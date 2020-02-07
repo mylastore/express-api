@@ -1,4 +1,4 @@
-# API server for Svelte JS with Parcel
+# Express API server with user authentication, forgot password and user roles
 
 ## Note
 
@@ -8,7 +8,7 @@ This backend was inspired by of an awesome course from udemy [Reference](https:/
 
 - Built to work with this Svelte JS frontend git repo [svelte-parcel](https://github.com/mylastore/svelte-parcel.git) 
 - The brilliantly simple, babel-less, bundle-less ECMAScript module loader [esm](https://github.com/standard-things/esm#readme)
-- User authentication
+- User authentication using JWT token
 - User profile page
 - User forgot password
 - User roles (customer, admin etc)
