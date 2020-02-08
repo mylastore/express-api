@@ -44,7 +44,7 @@ const meetupsRoutes = require('../src/routes/meetups'),
       adminRoutes = require('../src/routes/admin'),
       apiRoutes = require('../src/routes/api');
 
-mongoose.connect(dataBase, { useCreateIndex: true, useNewUrlParser: true })
+mongoose.connect(dataBase, { useCreateIndex: true, useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('DB:',dataBase))
   .catch(err => console.log(err));
 

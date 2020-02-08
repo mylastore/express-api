@@ -15,9 +15,11 @@ This backend was inspired by of an awesome course from udemy [Reference](https:/
 - Forms with Nodemailer [Nodemailer](https://nodemailer.com/about/) and Sendgrid [Sendgrid](https://sendgrid.com/)
 
 ## Project setup
+Rename the example.env to .env and add your credentials. 
 ```
 npm i
 ```
+
 
 ### Compiles and hot-reloads for development
 ```
