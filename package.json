@@ -9,6 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon papaslive.js",
+    "seed": "node src/seed.js",
     "precomit": "npm run lint",
     "lint": "eslint ./src/ --ignore-path .gitignore --ignore-pattern internals/scripts"
   },

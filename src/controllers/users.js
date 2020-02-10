@@ -13,6 +13,26 @@ const validator = require('validator');
 const _ = require('lodash');
 const crypto = require('crypto');
 
+/**
+ * Helper method for getting user's gravatar and storing it for both endpoints
+ * new user and user update
+ */
+function gravatar(email) {
+   const size = 200;
+   if (!email) {
+     return `https://gravatar.com/avatar/?s=${size}&d=mp`;
+   }
+   const md5 = crypto.createHash('md5').update(email).digest('hex');
+   return `https://gravatar.com/avatar/${md5}?s=${size}&d=mp`;
+ };
+ 
+// password must be 8 characters or more, must have a capital letter and 1 special character 
+function validatePassword(val) {
+  return new RegExp(
+      "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(.{8,50})$"
+  ).test(val);
+}
+
 const transporter = nodemailer.createTransport({
     service: 'SendGrid',
     auth: {
@@ -34,7 +54,16 @@ exports.getCurrentUser = function (req, res, next) {
 };
 
 exports.register = function (req, res) {
-    const registerData = req.body;
+    const email = req.body.email;
+    const password = req.body.password;
+    const passwordConfirmation = req.body.passwordConfirmation;
+    const avatar = gravatar(email);
+    const registerData = {
+        email,
+        password,
+        passwordConfirmation,
+        avatar
+    }
 
     if (registerData.name && !registerData.name.length >= 3) {
         return res.status(422).json({
@@ -63,11 +92,11 @@ exports.register = function (req, res) {
         })
     }
 
-    if (registerData.password && !registerData.password.length >= 6) {
+    if (!validatePassword(registerData.password)) {
         return res.status(422).json({
             errors: {
                 password: 'is required',
-                message: 'Password must be at least 6 characters'
+                message: 'Password must be at least 8 characters, must have at least 1 number and 1 special character'
             }
         })
     }
@@ -85,9 +114,8 @@ exports.register = function (req, res) {
     return user.save((error, savedUser, next) => {
         if (error) {
             return res.status(422).json({
-                errors: {
-                    error
-                }
+                // this returns unique validation erorrs 
+                errors: error
             })
         }
 
@@ -174,9 +202,13 @@ exports.updateUser = (req, res, next) => {
     const userId = req.params.id;
     const userData = req.body;
 
+
     User.findById(userId, (err, user) => {
         if (err) { return next(err); }
-        if (user.email !== userData.email) user.emailVerified = false;
+        if (user.email !== userData.email){
+            user.emailVerified = false;
+            user.avatar = gravatar(userData.email);
+        } 
 
         user.email = userData.email || '';
         user.profile.name = userData.name || '';
@@ -210,7 +242,7 @@ exports.updateUser = (req, res, next) => {
  */
 exports.updatePassword = (req, res, next) => {
     const validationErrors = [];
-    if (!validator.isLength(req.body.password, { min: 8 })) validationErrors.push({ message: 'Password must be at least 6 characters long' });
+    if (!validator.isLength(req.body.password, { min: 6 })) validationErrors.push({ message: 'Password must be at least 6 characters long' });
     if (req.body.password !== req.body.passwordConfirmation) validationErrors.push({ message: 'Passwords do not match' });
 
     if (validationErrors.length) {

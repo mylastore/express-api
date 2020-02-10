@@ -17,11 +17,26 @@ const userSchema = new Schema({
   },
   password: String,
   profile: {
-    name: String,
-    gender: String,
-    location: String,
-    website: String,
-    picture: String
+    name: {
+      type: String,
+      default: '',
+    },
+    gender: {
+      type: String,
+      default: ''
+    },
+    location: {
+      type: String,
+      default: ''
+    },
+    website: {
+      type: String,
+      default: ''
+    },
+    picture: {
+      type: String,
+      default: ''
+    },
   },
 
   passwordResetToken: String,
@@ -84,7 +99,7 @@ userSchema.methods.toUpdatedUser = function () {
     user: {
       _id: this._id,
       role: this.role,
-      avatar: this.gravatar(),
+      avatar: this.avatar,
       info: this.info,
       email: this.email,
       joinedMeetups: this.joinedMeetups,
@@ -101,7 +116,7 @@ userSchema.methods.toAuthJSON = function () {
     user: {
       _id: this._id,
       role: this.role,
-      avatar: this.gravatar(),
+      avatar: this.avatar,
       info: this.info,
       email: this.email,
       joinedMeetups: this.joinedMeetups,
@@ -117,21 +132,6 @@ userSchema.methods.toAuthJSON = function () {
   }
 };
 
-/**
- * Helper method for getting user's gravatar.
- */
-userSchema.methods.gravatar = function gravatar(size) {
-  if (!size) {
-    size = 200;
-  }
-  if (!this.email) {
-    return `https://gravatar.com/avatar/?s=${size}&d=retro`;
-  }
-  const md5 = crypto.createHash('md5').update(this.email).digest('hex');
-  return `https://gravatar.com/avatar/${md5}?s=${size}&d=retro`;
-};
-
-
-userSchema.plugin(uniqueValidator, {message: '{PATH} is already in used' });
+userSchema.plugin(uniqueValidator, {message: 'is already in used' });
 
 module.exports = mongoose.model('User', userSchema);

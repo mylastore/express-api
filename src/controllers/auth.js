@@ -1,12 +1,14 @@
-const passport = require('passport');
-import jwt from 'jsonwebtoken';
-import role from '../utils/roles';
+const jwt = require('jsonwebtoken');
+const role = require('../utils/roles');
 const User = require('../models/users');
 
 exports.onlyAuthUser = function (req, res, next) {
-    //const isAuthenticated = passport.authenticate('jwt', {session: false});
     const userToken = req.header('authorization');
-    if ( !userToken ) return res.status(401).send({error: 'Not Authenticated!'});
+    if ( !userToken ) return res.status(401).send({
+        errors: {
+            message: 'Not Authenticated!'
+        }
+    });
 
     try {
         const token = userToken.split(' ');

@@ -9,7 +9,8 @@ This backend was inspired by of an awesome course from udemy [Reference](https:/
 - Built to work with this Svelte JS frontend git repo [svelte-parcel](https://github.com/mylastore/svelte-parcel.git) 
 - The brilliantly simple, babel-less, bundle-less ECMAScript module loader [esm](https://github.com/standard-things/esm#readme)
 - User authentication using JWT token
-- User profile page
+- User passwrod requirements (Min length 8, 1 capital letter, 1 spcial characrer)
+- User profile page with [gravatar](https://en.gravatar.com/)
 - User forgot password
 - User roles (customer, admin etc)
 - Forms with Nodemailer [Nodemailer](https://nodemailer.com/about/) and Sendgrid [Sendgrid](https://sendgrid.com/)
@@ -20,10 +21,15 @@ Rename the example.env to .env and add your credentials.
 npm i
 ```
 
-
 ### Compiles and hot-reloads for development
 ```
 npm start
+```
+  
+### Sample User DATA (Warning! will errase mongodb data and add sample data)
+This will add sample users, meetups, categories, threads & posts to mongoDB
+```
+npm run seed
 ```
 
 ### Frontend code can be found here
@@ -31,9 +37,7 @@ npm start
 Reference [Frontend Git Repo Built with Svelte JS and Parcel](https://github.com/mylastore/svelte-parcel.git)
 
 
-### This Git repo
-
-Reference [Express API](https://github.com/mylastore/express-api.git)
+### This git repo url: [Express API](https://github.com/mylastore/express-api.git)
 
 ### Todo
 
