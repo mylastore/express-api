@@ -9,7 +9,7 @@ This backend was inspired by of an awesome course from udemy [Reference](https:/
 - Built to work with this Svelte JS frontend git repo [svelte-parcel](https://github.com/mylastore/svelte-parcel.git) 
 - The brilliantly simple, babel-less, bundle-less ECMAScript module loader [esm](https://github.com/standard-things/esm#readme)
 - User authentication using JWT token
-- User passwrod requirements (Min length 8, 1 capital letter, 1 spcial characrer)
+- User passwrod requirements (min length 8, 1 capital letter, 1 special character)
 - User profile page with [gravatar](https://en.gravatar.com/)
 - User forgot password
 - User roles (customer, admin etc)
