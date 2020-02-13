@@ -13,5 +13,5 @@
  * scripts down below using //= filename.js notation.
  */
 
-//= require bootstrap/bootstrap.js
+
 //= require app
