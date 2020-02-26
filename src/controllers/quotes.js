@@ -1,5 +1,6 @@
 const Quote = require('../models/quotes');
-const transporter = require('../utils/helpers').sendPlainEmail();
+const _data = require('../utils/files');
+const helpers = require('../utils/helpers');
 
 exports.getQuote = function (req, res, next) {
     const quoteId = req.params.id;
@@ -43,37 +44,23 @@ exports.create = function (req, res) {
                     error: error.errors,
                 }         
             });
-        } else {
-            const emailTo = process.env.EMAIL_TO;
-            const companyName = process.env.COMPANY_NAME;
-            const companyEmail = process.env.COMPANY_EMAIL;
+        } 
 
-            const name = savedQuote.name;
-            const email = savedQuote.email;
-            const content = savedQuote.content;
-            
-            const mailOptions ={
-                from: companyName + ' ' + '<' + companyEmail + '>',
-                to: emailTo,
-                subject: 'New Quote | ' + companyName,
-                html: `<h1>New quote was created.</h1><br><p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${content}</p>`
-            }
-            transporter.sendMail(mailOptions, function(err){
-                if (err) {
-                        res.status(422).json({
-                        errors: {
-                            message: 'Oops something went wrong, please try again.',
-                            error: err,
-                        }
-                    })
-                } else {
-                    res.status(200).json({
-                        message: 'Your email was sent successfully!',
-                    })
-                }
-            });
-            return res.json(savedQuote)
-        }
+        const settingId = 'setting-39ob0ar23m9444j73zqj';
+        _data.read('settings', settingId, function (err, checkData) {       
+             if(!err && checkData && savedQuote && checkData.newQuote === true){
+                const name = savedQuote.name;
+                const email = savedQuote.email;
+                const tel = savedQuote.tel || '';
+                const site = savedQuote.site || '';
+                const msg = savedQuote.msg;
+                const reason = "New Quote";
+                helpers.sendEmailQuote(name, email, tel, site, msg, reason);    
+             }
+        });
+
+        return res.json(savedQuote)
+      
     });
 };
 

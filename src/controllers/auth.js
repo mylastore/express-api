@@ -26,13 +26,15 @@ exports.onlyAuthUser = function (req, res, next) {
                 } else
                     return res.status(401).send({
                         errors: {
+                            status: 401,
                             message: 'Access Denied: You dont have correct privilege to perform this operation'                        
                         }
                     });
             } else {
                 return res.status(500).send({
                     errors: {
-                        message: 'Something went wrong, please try again later.'   
+                        status: 500,
+                        message: 'Something went wrong, please try again later.'
                     }                                
                 });
             }

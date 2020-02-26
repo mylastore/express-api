@@ -1,13 +1,12 @@
-const transporter = require('../utils/helpers.js').sendEmail();
+const helpers = require('../utils/helpers');
+
 
 exports.send = function (req, res) {
     const data = req.body;
-
     req.assert('name', 'Name cannot be blank').notEmpty();
     req.assert('email', 'Email is not valid').isEmail();
-    req.assert('content', 'Message cannot be blank').notEmpty();
+    req.assert('msg', 'Message cannot be blank').notEmpty();
     req.sanitize('email').normalizeEmail({ remove_dots: false });
-
     const errors = req.validationErrors();
     if (errors) {
         res.status(422).json({
@@ -18,39 +17,23 @@ exports.send = function (req, res) {
         })
     }
 
-    const companyName = process.env.COMPANY_NAME;
-    const companyUrl = process.env.COMPANY_URL;
-    const emailTo = process.env.EMAIL_TO;
-
-    const mailOptions = {
-        from: data.name + ' ' + '<' + data.email + '>',
-        to: emailTo,
-        subject: 'Contact Form | ' + companyName,
-        template: 'contact-form',
-
-        context: {
-            companyName: companyName,
-            companyUrl: companyUrl,
-            tel: data.phone,
-            name: data.name,
-            message: data.content,
-            email: data.email,
-            company: data.company
-        }
-    };
-
-    transporter.sendMail(mailOptions, function (err) {
-        if (err) {
+    const name = data.name;
+    const email = data.email;
+    const tel = data.tel || '';
+    const site = data.site || '';
+    const msg = data.msg;
+    const reason = "New Contact Email"
+    helpers.sendEmailNotification(name, email, tel, site, msg, reason, function(err){
+        if(err){
             res.status(422).json({
                 errors: {
-                    message: 'Oops something went wrong, please try again.',
-                    error: err,
+                    message: 'Oops something went wrong, please try again later.'
                 }
             })
-        } else {
-            res.status(200).json({
-                message: 'Your email was sent successfully!',
-            })
         }
+        res.status(200).json({
+            message: 'Your eamil was sent successfully!'
+        })
     });
+
 };

@@ -1,6 +1,4 @@
 
-
-const nodemailer = require('nodemailer');
 const { promisify } = require('util');
 const User = require('../models/users');
 const Meetup = require('../models/meetups');
@@ -8,41 +6,33 @@ const Thread = require('../models/threads');
 const Post = require('../models/posts');
 const Category = require('../models/categories');
 const passport = require('passport');
-const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const _ = require('lodash');
 const crypto = require('crypto');
+const _data = require('../utils/files');
+const helpers = require('../utils/helpers');
 
 /**
  * Helper method for getting user's gravatar and storing it for both endpoints
  * new user and user update
  */
 function gravatar(email) {
-   const size = 200;
-   if (!email) {
-     return `https://gravatar.com/avatar/?s=${size}&d=mp`;
-   }
-   const md5 = crypto.createHash('md5').update(email).digest('hex');
-   return `https://gravatar.com/avatar/${md5}?s=${size}&d=mp`;
- };
- 
-// password must be 8 characters or more, must have a capital letter and 1 special character 
+    const size = 200;
+    if (!email) {
+        return `https://gravatar.com/avatar/?s=${size}&d=mp`;
+    }
+    const md5 = crypto.createHash('md5').update(email).digest('hex');
+    return `https://gravatar.com/avatar/${md5}?s=${size}&d=mp`;
+};
+
+// password must be 8 to 50 characters, must have 1 capital letter and 1 special character 
 function validatePassword(val) {
-  return new RegExp(
-      "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(.{8,50})$"
-  ).test(val);
+    return new RegExp(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(.{8,50})$"
+    ).test(val);
 }
 
-const transporter = nodemailer.createTransport({
-    service: 'SendGrid',
-    auth: {
-      user: process.env.SENDGRID_USER_NAME,
-      pass: process.env.SENDGRID_PASSWORD
-    }
-  });
 
-const companyName = process.env.COMPANY_NAME;
-const companyEmail = process.env.EMAIL_TO;
 const randomBytesAsync = promisify(crypto.randomBytes);
 
 exports.getCurrentUser = function (req, res, next) {
@@ -64,7 +54,6 @@ exports.register = function (req, res) {
         passwordConfirmation,
         avatar
     }
-
     if (registerData.name && !registerData.name.length >= 3) {
         return res.status(422).json({
             errors: {
@@ -73,7 +62,6 @@ exports.register = function (req, res) {
             }
         })
     }
-
     if (!registerData.email) {
         return res.status(422).json({
             errors: {
@@ -82,7 +70,6 @@ exports.register = function (req, res) {
             }
         })
     }
-
     if (!registerData.password) {
         return res.status(422).json({
             errors: {
@@ -91,7 +78,6 @@ exports.register = function (req, res) {
             }
         })
     }
-
     if (!validatePassword(registerData.password)) {
         return res.status(422).json({
             errors: {
@@ -109,7 +95,6 @@ exports.register = function (req, res) {
             }
         })
     }
-
     const user = new User(registerData);
     return user.save((error, savedUser, next) => {
         if (error) {
@@ -118,50 +103,26 @@ exports.register = function (req, res) {
                 errors: error
             })
         }
-
         return passport.authenticate('local', (err, passportUser) => {
             if (err) {
                 return next(err)
             }
-            if (passportUser) {
-                const userEmail = registerData.email;
 
-                const mailOptions = {
-                    from: companyName + ' ' + '<' + companyEmail + '>',
-                    to: companyEmail,
-                    subject: 'New user created | ' + companyName,
-                    html: `<h1>New user was created.</h1><br><p>Email: ${userEmail}</p>`
+            const settingId = 'setting-39ob0ar23m9444j73zqj';
+            _data.read('settings', settingId, function (err, checkData) {                
+                if (!err && checkData && passportUser && checkData.newUser === true) {
+                    const userEmail = registerData.email;
+                    helpers.sendEmailNewUser(userEmail);    
                 }
-
-                transporter.sendMail(mailOptions, function (err) {
-                    if (err) {
-                        res.status(422).json({
-                            errors: {
-                                message: 'Oops something went wrong, please try again.',
-                                error: err,
-                            }
-                        })
-                    } else {
-                        res.status(200).json({
-                            message: 'Your email was sent successfully!',
-                        })
-                    }
-                });
-                return res.json(passportUser.toAuthJSON())
-            } else {
-                return res.status(422).json({ errors: { message: 'Invalid password or email' } })
-            }
+            });
+            return res.json(passportUser.toAuthJSON())
 
         })(req, res, next)
-
-        //return res.json(savedUser)
     });
-
 };
 
 exports.login = function (req, res, next) {
     const { email, password } = req.body;
-
     if (!email) {
         return res.status(422).json({
             errors: {
@@ -170,7 +131,6 @@ exports.login = function (req, res, next) {
             }
         })
     }
-
     if (!password) {
         return res.status(422).json({
             errors: {
@@ -179,7 +139,6 @@ exports.login = function (req, res, next) {
             }
         })
     }
-
     return passport.authenticate('local', (err, passportUser) => {
         if (err) {
             return next(err)
@@ -189,7 +148,6 @@ exports.login = function (req, res, next) {
         } else {
             return res.status(422).json({ errors: { message: 'Invalid password or email' } })
         }
-
     })(req, res, next)
 };
 
@@ -201,21 +159,17 @@ exports.logout = function (req, res) {
 exports.updateUser = (req, res, next) => {
     const userId = req.params.id;
     const userData = req.body;
-
-
     User.findById(userId, (err, user) => {
         if (err) { return next(err); }
-        if (user.email !== userData.email){
+        if (user.email !== userData.email) {
             user.emailVerified = false;
             user.avatar = gravatar(userData.email);
-        } 
-
+        }
         user.email = userData.email || '';
         user.profile.name = userData.name || '';
         user.profile.gender = userData.gender || '';
         user.profile.location = userData.location || '';
         user.profile.website = userData.website || '';
-
         user.save({ new: true }, (err, updatedUser) => {
             if (err) {
                 if (err.code === 11000) {
@@ -232,9 +186,7 @@ exports.updateUser = (req, res, next) => {
             return res.json(updatedUser.toUpdatedUser());
         });
     });
-
 };
-
 
 /**
  * POST /account/password
@@ -244,18 +196,21 @@ exports.updatePassword = (req, res, next) => {
     const validationErrors = [];
     if (!validator.isLength(req.body.password, { min: 6 })) validationErrors.push({ message: 'Password must be at least 6 characters long' });
     if (req.body.password !== req.body.passwordConfirmation) validationErrors.push({ message: 'Passwords do not match' });
-
     if (validationErrors.length) {
-        return res.status(500).json({
-            errors: validationErrors
+        return res.status(422).json({
+            errors: {
+                message: "Password did not comply with our requirements",
+                error: validationErrors
+            }
         })
     }
-
-    User.findById(req.user.id, (err, user) => {
-        if (err) { return next(err); }
-        user.password = req.body.password;
-        user.save((err) => {
+    User.findById(req.user.id, (err, foundUser) => {
+        if (err) { return next(err) }
+        const userEmail = foundUser.email;
+        foundUser.password = req.body.password;        
+        foundUser.save((err) => {
             if (err) { return next(err); }
+            helpers.sendEmailPasswordUpdatedSuccessfully(userEmail);
             return res.status(200).json({
                 message: 'Your password was updated successfully!'
             })
@@ -273,147 +228,68 @@ exports.processResetPassword = (req, res, next) => {
     if (!validator.isLength(req.body.password, { min: 8 })) validationErrors.push({ message: 'Password must be at least 6 characters long' });
     if (req.body.password !== req.body.passwordConfirmation) validationErrors.push({ message: 'Passwords do not match' });
     if (!validator.isHexadecimal(req.params.token)) validationErrors.push({ message: 'Invalid Token.  Please retry.' });
-  
     if (validationErrors.length) {
-      return res.status(500).json({
-          errors: {
-              message: validationErrors
-          }
-      })
+        return res.status(500).json({
+            errors: {
+                message: validationErrors
+            }
+        })
     }
-    const resetPassword = () =>
-      User
+  
+    User
         .findOne({ passwordResetToken: req.params.token })
         .where('passwordResetExpires').gt(Date.now())
         .then((user) => {
-          if (!user) {
-              return res.status(422).json({
-                  errors: {
-                      message: 'Password reset token is invalid or has expired.'
-                  }
-              })
-          } else {
-            user.password = req.body.password;
-            user.passwordResetToken = undefined;
-            user.passwordResetExpires = undefined;
-            user.save();  
-          }
-          return user;  
-        
-        });
-  
-    const sendResetPasswordEmail = (user) => {
-        if(!user){
-            return;
-        } else {      
-            const userEmail = user.email;
-            const mailOptions = {
-              to: userEmail,
-              from: companyName + ' ' + '<' + companyEmail + '>',
-              subject: `Your password at ${companyName} has been changed`,
-              text: `Hello,\n\nThis is a confirmation that the password for your account ${userEmail} has just been changed.\n`
-            };
-            return transporter.sendMail(mailOptions)
-              .then(() => {
-                  res.status(200).json({
-                      message: 'Success! Your password has been changed.'
-                  })
-              })
-              .catch((err) => {
-                  if(err){
-                      console.log('oops: ',err);
-                    //   return res.status(422).json({
-                    //       errors: {
-                    //           message: 'Your password has been changed, however we were unable to send you a confirmation email. We will be looking into it shortly.',
-                    //           error: err
-                    //       }
-                    //   })
-                  }      
-              });
-        }
+            if (!user) {
+                return res.status(422).json({
+                    errors: {
+                        message: 'Password reset token is invalid or has expired.'
+                    }
+                })
+            } else {
+                user.password = req.body.password;
+                user.passwordResetToken = undefined;
+                user.passwordResetExpires = undefined;
+                user.save();
+                helpers.sendEmailPasswordResetSuccessfully(user.email);
+                res.status(200).json({
+                    message: 'Password was updated successfully. You may now log in to your account.'
+                })         
+            }
+            return user;
+        });   
 
+};
 
-
-    };
-  
-    resetPassword()
-      .then(sendResetPasswordEmail)
-      .then(() => res.status(200))
-      .catch(next);
-  };
-  
 
 /**
  * POST /forgot
  * Create a random token, then the send user an email with a reset link.
  */
 exports.forgotPassword = (req, res, next) => {
-    if (!validator.isEmail(req.body.email)) {
-        return res.status(422).json({
-            errors: {
-                message: "Please enter a valid email address."
-            }
-        })
-    }
-
-    req.body.email = validator.normalizeEmail(req.body.email, { gmail_remove_dots: false });
+    const email = req.body.email;
+    const host = process.env.REQUEST_HOST;
 
     const createRandomToken = randomBytesAsync(16)
         .then((buf) => buf.toString('hex'));
 
-    const setRandomToken = (token) =>
+    const setRandomToken = (token) =>{
         User
-            .findOne({ email: req.body.email })
+            .findOne({ email: email })
             .then((user) => {
-                if (!user) {
-                    return res.status(422).json({
-                        errors: {
-                            message: 'No account with that email was found.'
-                        }
-                    })
-                } else {
-                    user.passwordResetToken = token;
-                    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
-                    user = user.save();
-                }
-                return user;
-            });
-
-    const sendForgotPasswordEmail = (user) => {
-        if(!user){
-            return next();
-        }
-        const token = user.passwordResetToken;
-        const requestHost = process.env.REQUEST_HOST;
-        const mailOptions = {
-            to: user.email,
-            from: companyName + ' ' + '<' + companyEmail + '>',
-            subject: 'Password reset on ' + companyName,
-            text:   `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n
-                    Please click on the following link, or paste this into your browser to complete the process:\n
-                    http://${requestHost}/#/reset/${token}\n
-                    If you did not request this, please ignore this email and your password will remain unchanged.\n`
-        };
-        return transporter.sendMail(mailOptions)
-            .then(() => {
-                return res.status(200).json({
-                    message: `An e-mail has been sent to ${user.email} with further instructions.`
-                })
-            })
-            .catch((err) => {
-                if(err){
-                    return res.status(422).json({
-                      errors: {
-                          message: 'Error sending the password reset email. Please try again later'
-                      }
-                  });
-                }
-            });
-    };
+                user.passwordResetToken = token;
+                user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+                user = user.save();    
+                helpers.sendEmailForgotPassword(email, token, host)
+                res.status(200).json({
+                    message: `An e-mail has been sent to ${email} with further instructions.`
+                })        
+            })                   
+            return token;
+    }
 
     createRandomToken
         .then(setRandomToken)
-        .then(sendForgotPasswordEmail)
         .then(() => res.status(200))
         .catch(next);
 };
@@ -564,9 +440,7 @@ exports.addFavoriteMeetup = function (req, res) {
                     if (errors) {
                         return res.status(422).json({ errors })
                     }
-
                     return res.json(user)
-
                 })
 
         } else if (isInArray === true) {
@@ -584,4 +458,3 @@ exports.addFavoriteMeetup = function (req, res) {
         return res.status(401).json({ errors: { message: 'Not Authorized!' } })
     }
 };
-

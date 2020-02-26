@@ -38,11 +38,26 @@ const userSchema = new Schema({
       default: ''
     },
   },
+  settings: {
+    userNotification: {
+      type: Boolean,
+      default: false,
+    },
+    quoteNotification: {
+      type: Boolean,
+      default: false,
+    },
+    emailNotification: {
+      type: Boolean,
+      default: false,
+    },
+  },
 
   passwordResetToken: String,
   passwordResetExpires: Date,
   emailVerificationToken: String,
   emailVerified: Boolean,
+
 
   google: String,
   
@@ -89,28 +104,68 @@ userSchema.methods.generateJWT = function () {
   return jwt.sign({
     email: this.email,
     id: this._id,
+    role: this.role,
     xsrfToken: process.env.XSRF_TOKEN
   }, process.env.JWT_SECRET, {expiresIn: '1h'})
 };
 
 userSchema.methods.toUpdatedUser = function () {
-  return {
-    user: {
-      _id: this._id,
-      role: this.role,
-      avatar: this.avatar,
-      info: this.info,
-      email: this.email,
-      joinedMeetups: this.joinedMeetups,
-      favoriteMeetups: this.favoriteMeetups,
-      memberSince: this.createdAt,
-      emailVerified: this.emailVerified,
-      profile: this.profile
+  if(this.role === 'admin'){
+    return {
+      user: {
+        _id: this._id,
+        role: this.role,
+        avatar: this.avatar,
+        info: this.info,
+        email: this.email,
+        joinedMeetups: this.joinedMeetups,
+        favoriteMeetups: this.favoriteMeetups,
+        memberSince: this.createdAt,
+        emailVerified: this.emailVerified,
+        profile: this.profile,
+        settings: this.settings,
+      }
+    }
+  } else {
+    return {
+      user: {
+        _id: this._id,
+        role: this.role,
+        avatar: this.avatar,
+        info: this.info,
+        email: this.email,
+        joinedMeetups: this.joinedMeetups,
+        favoriteMeetups: this.favoriteMeetups,
+        memberSince: this.createdAt,
+        emailVerified: this.emailVerified,
+        profile: this.profile,
+      }
     }
   }
 };
 
 userSchema.methods.toAuthJSON = function () {
+  if(this.role === 'admin'){
+    return {
+      user: {
+        _id: this._id,
+        role: this.role,
+        avatar: this.avatar,
+        info: this.info,
+        email: this.email,
+        joinedMeetups: this.joinedMeetups,
+        favoriteMeetups: this.favoriteMeetups,
+        memberSince: this.createdAt,
+        emailVerified: this.emailVerified,
+        profile: this.profile,
+        settings: this.settings,
+      },
+      token: {
+        token: this.generateJWT()
+      }
+     
+    }
+  }
   return {
     user: {
       _id: this._id,

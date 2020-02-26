@@ -15,6 +15,7 @@ This backend was inspired by of an awesome course from udemy [Reference](https:/
 - User forgot password
 - User roles (customer, admin etc)
 - Forms with Nodemailer [Nodemailer](https://nodemailer.com/about/) and Sendgrid [Sendgrid](https://sendgrid.com/)
+- Added email notification settings - for example an email notification is sent when a new user is created. The option are true or false. File with settings is save here: (.data/settings/settings.json);
 
 ## Project setup
 Rename the example.env to .env and add your credentials. 
