@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Meetup = require('./models/meetups');
+const Quote = require('./models/quotes');
 const User = require('./models/users');
 const Post = require('./models/posts');
 const Thread = require('./models/threads');
@@ -11,6 +12,7 @@ const data = require('./data.js');
 class DB {
   constructor() {
     this.meetups = data.meetups;
+    this.quotes = data.quotes;
     this.users = data.users;
     this.threads = data.threads;
     this.posts = data.posts;
@@ -36,6 +38,10 @@ class DB {
 
     await this.meetups.forEach(async meetup => {
       await (new Meetup(meetup)).save(() => {})
+    })
+
+    await this.quotes.forEach(async quote => {
+      await (new Quote(quote)).save(() => {})
     })
 
     await this.threads.forEach(async thread => {

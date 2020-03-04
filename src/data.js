@@ -23,6 +23,13 @@ const user18Id = mongoose.Types.ObjectId();
 const user19Id = mongoose.Types.ObjectId();
 const user20Id = mongoose.Types.ObjectId();
 
+const quote1Id = mongoose.Types.ObjectId();
+const quote2Id = mongoose.Types.ObjectId();
+const quote3Id = mongoose.Types.ObjectId();
+const quote4Id = mongoose.Types.ObjectId();
+const quote5Id = mongoose.Types.ObjectId();
+const quote6Id = mongoose.Types.ObjectId();
+
 const meetup1Id = mongoose.Types.ObjectId();
 const meetup2Id = mongoose.Types.ObjectId();
 const meetup3Id = mongoose.Types.ObjectId();
@@ -47,6 +54,56 @@ const category4Id = mongoose.Types.ObjectId();
 const category5Id = mongoose.Types.ObjectId();
 
 module.exports = {
+  "quotes": [
+    {
+     "_id": quote1Id,
+     "name": "Bratislava",
+     "email": "email1@email.com",
+     "tel": "818-555-1111",
+     "site": "mysite.com",
+     "msg": "Some description of this event. I dont know what to talk about",
+   },
+   {
+     "_id": quote2Id,
+     "name": "Monica L",
+     "email": "email2@email.com",
+     "tel": "818-555-2222",
+     "site": "mysite.com",
+     "msg": "Some description of this event. I dont know what to talk about",
+   },
+   {
+     "_id": quote3Id,
+     "name": "Bristol M",
+     "email": "email3@email.com",
+     "tel": "818-555-3333",
+     "site": "mysite.com",
+     "msg": "Some description of this event. I dont know what to talk about",
+   },
+   {
+     "_id": quote4Id,
+     "name": "Jose M",
+     "email": "email4@email.com",
+     "tel": "818-555-4444",
+     "site": "mysite.com",
+     "msg": "Some description of this event. I dont know what to talk about",
+   },
+   {
+     "_id": quote5Id,
+     "name": "Luck Joe",
+     "email": "email5@email.com",
+     "tel": "818-555-5555",
+     "site": "mysite.com",
+     "msg": "Some description of this event. I dont know what to talk about",
+   },
+   {
+     "_id": quote6Id,
+     "name": "Team LA",
+     "email": "email6@email.com",
+     "tel": "818-555-6666",
+     "site": "mysite.com",
+     "msg": "Some description of this event. I dont know what to talk about",
+   },
+ ],
   "meetups": [
      {
       "_id": meetup1Id,
@@ -594,5 +651,5 @@ module.exports = {
       "name": "games",
       "image": "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1500&q=80"
     }
-  ]
+  ],
 };

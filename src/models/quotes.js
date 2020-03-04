@@ -12,8 +12,8 @@ const quoteSchema = new Schema({
   name: { type: String, required: true,  minlength: [2, 'Name: must be at lest 3 characters'], maxlength: [512, 'Name: to long, max is 512 characters'] },
   site: { type: String, required: true, minlength: [2, 'Company Name: must be at lest 3 characters'], maxlength: [512, 'Phone Number: to long, max is 512 characters'] },
   tel: { type: String, maxlength: [13, 'Phone Number: is to long, max is 13 characters'] },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Quote', quoteSchema);

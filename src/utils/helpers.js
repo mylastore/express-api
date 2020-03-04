@@ -25,6 +25,71 @@ const companyUrl = process.env.COMPANY_URL;
 const companyTagline = process.env.COMPANY_TAG_LINE;
 const companyAddress = process.env.COMPANY_ADDRESS;
 
+helpers.cart = function(oldCart){
+  this.items = oldCart.items || {};
+  this.totalQty = oldCart.totalQty || 0;
+  this.totalPrice = oldCart.totalPrice || 0;
+
+  this.addItem = function(item, id) {
+      let storedItem = this.items[id];
+      if (!storedItem) {
+          storedItem = this.items[id] = {item: item, qty: 0, price: 0};
+      }
+      storedItem.qty++;
+      storedItem.price = storedItem.item.price * storedItem.qty;
+      this.totalQty++;
+      this.totalPrice += storedItem.item.price;
+  };
+
+  this.reduceByOne = function(id) {
+      this.items[id].qty--;
+      this.items[id].price -= this.items[id].item.price;
+      this.totalQty--;
+      this.totalPrice -= this.items[id].item.price;
+
+      if (this.items[id].qty <= 0) {
+          delete this.items[id];
+      }
+  };
+
+  this.increaseByOne = function(id) {
+      this.items[id].qty++;
+      this.items[id].price += this.items[id].item.price;
+      this.totalQty++;
+      this.totalPrice += this.items[id].item.price;
+
+      if (this.items[id].qty <= 0) {
+          delete this.items[id];
+      }
+  };
+
+  this.removeItem = function(id) {
+      this.totalQty -= this.items[id].qty;
+      this.totalPrice -= this.items[id].price;
+      delete this.items[id];
+  };
+
+  this.generateArray = function() {
+      var arr = [];
+      for (let id in this.items) {
+          arr.push(this.items[id]);
+      }
+      return arr;
+  };
+}
+
+helpers.formatDate = function(data){
+  const d = moment(new Date(date));
+  return d.format('MMMM DD, YYYY');
+}
+
+helpers.formatPrice = function(cents, location = "USD"){
+  return (cents / 100).toLocaleString("en-US", {
+    style: 'currency',
+    currency: location
+  })
+}
+
 // Parse a JSON string to an object in all cases, without throwing
 helpers.parseJsonToObject = function (str) {
   try {

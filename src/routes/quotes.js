@@ -5,7 +5,7 @@ const QuotesCtrl = require('../controllers/quotes');
 const AuthCtrl = require('../controllers/auth');
 
 router.get('/:id', AuthCtrl.onlyAuthUser, QuotesCtrl.getQuote);
-router.get('/', AuthCtrl.onlyAuthUser, QuotesCtrl.getAllQuotes);
+router.get('/all/:page', AuthCtrl.onlyAuthUser, QuotesCtrl.getQuotes);
 
 router.post('/create', QuotesCtrl.create);
 router.delete('/:id', AuthCtrl.onlyAuthUser, QuotesCtrl.delete);

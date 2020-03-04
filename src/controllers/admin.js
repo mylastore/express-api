@@ -9,7 +9,7 @@ exports.getUsers = async (req, res) => {
     const foundUsers = await User.find({})
       .skip((resPerPage * page) - resPerPage)
       .limit(resPerPage);
-    if (foundUsers < 0) {
+    if (foundUsers.length <= 0) {
       return res.status(422).send({
         errors: {
           message: 'No users found!'

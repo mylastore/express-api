@@ -21,14 +21,29 @@ exports.getQuote = function (req, res, next) {
 
 };
 
-exports.getAllQuotes = async (req, res, next) => {
+exports.getQuotes = async (req, res, next) => {
+    const resPerPage = 2;
+    const page = req.params.page || 1;
     try {
-      const quotes = await Quote.list(req.query);
-      const transformedQuotes = quotes.map(quotes => quotes.transform());
-      res.json(transformedQuotes);
-    } catch (error) {
-      next(error);
-    }
+        const foundQuotes = await Quote.find({})
+        .skip((resPerPage * page) - resPerPage)
+        .limit(resPerPage);
+        if(foundQuotes.length <= 0){
+            return res.status(422).send({
+                errors: {
+                    message: "No quotes found!"
+                }
+            })
+        }
+        const totalItems = await Quote.countDocuments({});
+        return res.status(200).json({  "totalItems": totalItems, "resPerPage": resPerPage, "quotes": foundQuotes  })
+    } catch (err) {
+        if (err) {
+          return res.status(422).send({
+            errors: err
+          });
+        }
+      }
   };
   
 
