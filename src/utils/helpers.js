@@ -301,7 +301,7 @@ helpers.sendEmailNewUser = function (email) {
       from: companyName + ' ' + '<' + companyEmail + '>',
       to: emailTo,
       subject: 'New user was created at '+companyName,
-      html: `<h1>New user was created.</h1><br><p>Email: ${userEmail}</p>`
+      html: `<h1>New user was created.</h1><br><p>Email: ${email}</p>`
     };
     transport.sendMail(payload, function (error, info) {
       if (error) {
